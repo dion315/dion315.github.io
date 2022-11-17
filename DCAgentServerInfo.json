@@ -1,0 +1,48 @@
+{
+    "RemoteOfficeProps": {
+        "SERVERPROTOCOL": "https",
+        "REMOTEOFFICENAME": "Local Office",
+        "CUSTOMERID": "1",
+        "ENABLEPROXY": "no",
+        "REMOTEOFFICEAUTHKEY": "ec9c3a34e65704138843b6e767abce33",
+        "USEJSON": "true",
+        "CUSTOMERNAME": "DC_CUSTOMER",
+        "MSIRESTARTMANAGERCONTROL": "Disable",
+        "REMOTEOFFICEID": "1",
+        "ALLUSERS": "1"
+    },
+    "DSAuthProps": {
+        "VALUE1": "ee88c0e0eab8ccde9f9bd450bd9a78b1a0e61f15909d92e7afd3a738500c70fafdd32193d6c136653d270d5093d5c0e6",
+        "SC_VALUE": "1",
+        "VALUE2": "ec9c3a34e65704138843b6e767abce33",
+        "branchID": "1"
+    },
+    "ServerInfoProps": {
+        "SERVERFLATNAME": "deskcenpr1",
+        "productcode": "DCEE",
+        "SERVERSECIPADDRESS": "dcseg.raymourflanigan.com",
+        "SERVERPORT": "8383",
+        "SERVERIPADDRESS": "10.0.3.211",
+        "MSPNAME": "DC_MSP",
+        "SERVERSECUREPORT": "8383",
+        "SERVERNAME": "deskcenpr1.raymourflanigan.local"
+    },
+    "AgentProps": {
+        "PERFORMASSETSCAN": "yes",
+        "AGENTVERSION": "10.1.2220.10.W",
+        "AGENTPOLLINGINTERVAL": "2",
+        "PERFORMPOSTINSTALL": "yes",
+        "DATA_TRANSFER_RATE": "0",
+        "PERFORMPATCHSCAN": "yes",
+        "ProductVersion": "10.1.2220.10.W",
+        "USEJSON": "true",
+        "PROXYBYPASS": "",
+        "ENABLE_CAPTCHA": "yes",
+        "ENABLESILENT": "YES",
+        "ENABLEREMOTEOFFICEMGMT": "no",
+        "UEMSProductCode": "[DCEE]",
+        "ENABLEDISTRIBUTIONSERVER": "no",
+        "AUTODETECT_PROXY": "false"
+    },
+    "ServerHashTime": "1644009611"
+}
