@@ -13,9 +13,16 @@ function stepSequencer(time) {
   tracks.forEach(t => {
     t.grid.forEach((row, r) => {
       row.forEach((cell, c) => {
-        if (cell.on && c === step) {
-          const freq = 220 * Math.pow(2, (11 - r) / 12);
-          voiceManager.play(ctx, t, freq, cell.vel, time, cell.len * stepDuration());
+        if (cell.on && c === (step % 16)) {
+          const freq = 220
+            * Math.pow(2, (11 - r) / 12)
+            * Math.pow(2, (t.octave !== undefined ? t.octave - 4 : 0))
+            * Math.pow(2, (t.pitch  !== undefined ? t.pitch  / 12 : 0));
+          const noteTime = Math.max(
+            ctx.currentTime + 0.001,
+            time + (t.nudge !== undefined ? t.nudge / 1000 : 0)
+          );
+          voiceManager.play(ctx, t, freq, cell.vel, noteTime, cell.len * stepDuration());
         }
       });
     });
@@ -26,7 +33,7 @@ function stepSequencer(time) {
     drumMachine.step(step, time);
   }
 
-  step = (step + 1) % 16;
+  step = (step + 1) % 32;
 }
 
 function startScheduler() { interval = setInterval(scheduler, 25); }

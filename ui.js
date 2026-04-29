@@ -31,15 +31,19 @@ function createTrack(idx) {
   const chain = new EffectsChain(ctx, effectsIn, muteGain);
 
   return {
-    grid:     createGrid(),
-    volume:   0.7,
-    pan:      0,
-    cutoff:   4000,
-    attack:   0.01,
-    decay:    0.2,
-    sustain:  0.6,
-    release:  0.3,
-    waveType: 'sawtooth',
+    grid:      createGrid(),
+    volume:    0.7,
+    pan:       0,
+    cutoff:    4000,
+    resonance: 1,
+    attack:    0.01,
+    decay:     0.2,
+    sustain:   0.6,
+    release:   0.3,
+    pitch:     0,
+    octave:    4,
+    nudge:     0,
+    waveType:  'sawtooth',
     color:    TRACK_COLORS[idx % TRACK_COLORS.length],
     output:   effectsIn,  // voice.js connects here
     muteGain,
@@ -137,14 +141,16 @@ function buildModule(t, i) {
   const row1 = document.createElement('div');
   row1.className = 'knob-row';
 
-  const volK = new Knob({ label:'VOL',    min:0, max:1,    step:0.01, value:t.volume,  color:t.color,     size:48,
+  const volK = new Knob({ label:'VOL',    min:0,   max:1,    step:0.01, value:t.volume,    color:t.color,   size:48,
     onChange: v => { t.volume = v; } });
-  const panK = new Knob({ label:'PAN',    min:-1,max:1,    step:0.01, value:t.pan,     color:'#aaaaaa',   size:48,
+  const panK = new Knob({ label:'PAN',    min:-1,  max:1,    step:0.01, value:t.pan,       color:'#aaaaaa', size:48,
     onChange: v => { t.pan = v; } });
-  const cutK = new Knob({ label:'CUTOFF', min:200,max:8000,step:10,   value:t.cutoff,  color:'#ff9500',   size:48,
+  const cutK = new Knob({ label:'CUTOFF', min:200, max:8000, step:10,   value:t.cutoff,    color:'#ff9500', size:48,
     onChange: v => { t.cutoff = v; } });
+  const resK = new Knob({ label:'RES',    min:0.1, max:20,   step:0.1,  value:t.resonance, color:'#ff6600', size:48,
+    onChange: v => { t.resonance = v; } });
 
-  [volK, panK, cutK].forEach(k => row1.appendChild(k.el));
+  [volK, panK, cutK, resK].forEach(k => row1.appendChild(k.el));
 
   const meterCanvas = document.createElement('canvas');
   meterCanvas.width = 10; meterCanvas.height = 72;
@@ -167,6 +173,47 @@ function buildModule(t, i) {
   const relK = new Knob({ label:'REL', min:0.01, max:4,  step:0.01,  value:t.release, color:'#ff5500', size:40, onChange: v=>{t.release=v;} });
   [atkK, decK, susK, relK].forEach(k => row2.appendChild(k.el));
   body.appendChild(row2);
+
+  // Pitch / Octave section
+  const pitchLbl = document.createElement('div');
+  pitchLbl.className = 'section-lbl';
+  pitchLbl.textContent = '— PITCH / OCT —';
+  body.appendChild(pitchLbl);
+
+  const pitchOctRow = document.createElement('div');
+  pitchOctRow.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px;';
+
+  const pitchK = new Knob({ label:'PITCH', min:-12, max:12, step:1, value:t.pitch,
+    color:'#cc44ff', size:38,
+    fmt: v => (v > 0 ? '+' : '') + Math.round(v),
+    onChange: v => { t.pitch = Math.round(v); }
+  });
+  pitchK.el.style.flex = '0 0 auto';
+  pitchOctRow.appendChild(pitchK.el);
+
+  const nudgeK = new Knob({ label:'NUDGE', min:-50, max:50, step:1, value:t.nudge,
+    color:'#44aaff', size:38,
+    fmt: v => (v > 0 ? '+' : '') + Math.round(v) + 'ms',
+    onChange: v => { t.nudge = Math.round(v); }
+  });
+  nudgeK.el.style.flex = '0 0 auto';
+  pitchOctRow.appendChild(nudgeK.el);
+
+  const octBtns = document.createElement('div');
+  octBtns.className = 'oct-btns';
+  for (let o = 1; o <= 7; o++) {
+    const b = document.createElement('button');
+    b.className = 'oct-btn' + (t.octave === o ? ' active' : '');
+    b.textContent = o;
+    b.onclick = () => {
+      t.octave = o;
+      octBtns.querySelectorAll('.oct-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    };
+    octBtns.appendChild(b);
+  }
+  pitchOctRow.appendChild(octBtns);
+  body.appendChild(pitchOctRow);
 
   // Sequencer section
   const seqLbl = document.createElement('div');
@@ -265,19 +312,24 @@ function renderGrid(track) {
   function draw() {
     g.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
-    g.fillStyle = '#555'; g.font = '7px monospace'; g.textAlign = 'right';
+    const cs      = getComputedStyle(document.documentElement);
+    const lblCol  = cs.getPropertyValue('--grid-lbl').trim()     || '#666666';
+    const offCol  = cs.getPropertyValue('--grid-off').trim()     || '#141414';
+    const offActC = cs.getPropertyValue('--grid-off-act').trim() || '#1e2a2a';
+
+    g.fillStyle = lblCol; g.font = '9px monospace'; g.textAlign = 'right';
     NOTE_NAMES.forEach((name, r) => g.fillText(name, LABEL_W - 3, r * CELL_H + CELL_H - 2));
 
     track.grid.forEach((row, r) => {
       row.forEach((cell, cx) => {
-        const active = isPlaying && cx === step;
+        const active = isPlaying && cx === (step % 16);
         const x = LABEL_W + cx * CELL_W, y = r * CELL_H;
         if (cell.on) {
           g.fillStyle   = active ? '#ffffff' : track.color;
           g.shadowColor = active ? '#ffffff' : track.color;
           g.shadowBlur  = active ? 8 : 4;
         } else {
-          g.fillStyle  = active ? '#1e2a2a' : '#141414';
+          g.fillStyle  = active ? offActC : offCol;
           g.shadowBlur = 0;
         }
         g.fillRect(x + 1, y + 1, CELL_W - 3, CELL_H - 3);
@@ -288,7 +340,7 @@ function renderGrid(track) {
     if (isPlaying) {
       g.strokeStyle = 'rgba(255,255,255,0.12)';
       g.lineWidth   = 1;
-      g.strokeRect(LABEL_W + step * CELL_W + 0.5, 0.5, CELL_W - 1, CANVAS_H - 1);
+      g.strokeRect(LABEL_W + (step % 16) * CELL_W + 0.5, 0.5, CELL_W - 1, CANVAS_H - 1);
     }
   }
 
@@ -324,11 +376,16 @@ function drawVU(t) {
   const SEGS = 18, segH = Math.floor((H - (SEGS - 1)) / SEGS);
   g.clearRect(0, 0, W, H);
 
+  const cs  = getComputedStyle(document.documentElement);
+  const rOff = cs.getPropertyValue('--vu-r').trim() || '#200000';
+  const yOff = cs.getPropertyValue('--vu-y').trim() || '#1a1000';
+  const gOff = cs.getPropertyValue('--vu-g').trim() || '#001a08';
+
   for (let s = 0; s < SEGS; s++) {
     const pct = (SEGS - s - 1) / SEGS, y = s * (segH + 1), on = rms > pct;
-    if      (pct > 0.88) g.fillStyle = on ? '#ff2200' : '#200000';
-    else if (pct > 0.65) g.fillStyle = on ? '#ffaa00' : '#1a1000';
-    else                 g.fillStyle = on ? '#00cc44' : '#001a08';
+    if      (pct > 0.88) g.fillStyle = on ? '#ff2200' : rOff;
+    else if (pct > 0.65) g.fillStyle = on ? '#ffaa00' : yOff;
+    else                 g.fillStyle = on ? '#00cc44' : gOff;
     g.fillRect(0, y, W, segH);
   }
   if (t._peak > 0.02) {
@@ -345,6 +402,15 @@ function animLoop() {
   requestAnimationFrame(animLoop);
 }
 
+// ─── Theme toggle ─────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light-mode');
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = isLight ? '◑ LIGHT' : '◐ DARK';
+  localStorage.setItem('opensynth-theme', isLight ? 'light' : 'dark');
+  Knob.redrawAll();
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 const masterKnob = new Knob({
   label: '', min: 0, max: 1, step: 0.01, value: 0.8,
@@ -358,3 +424,10 @@ drumSec.appendChild(drumMachine.render());
 
 addTrack();
 animLoop();
+
+// Sync theme button label with saved preference
+(function() {
+  const saved = localStorage.getItem('opensynth-theme');
+  const btn = document.getElementById('theme-btn');
+  if (btn && saved === 'light') btn.textContent = '◑ LIGHT';
+})();

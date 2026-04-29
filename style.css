@@ -1,9 +1,105 @@
+/* ── CSS Custom Properties ────────────────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg:         #080808;
+  --bg-rack:    #090909;
+  --s0:         #0c0c0c;   /* seq canvas, deep wells */
+  --s1:         #0e0e0e;   /* app-header, fx-rows */
+  --s2:         #111111;   /* modules, drum machine, inputs */
+  --s3:         #161616;   /* mod-headers, drum-header, btn bg */
+  --s4:         #1a1a1a;   /* active/hover surfaces */
+
+  /* Borders */
+  --b0: #131313;
+  --b1: #1a1a1a;
+  --b2: #1e1e1e;
+  --b3: #252525;
+  --b4: #444444;
+
+  /* Text — all bumped for readability */
+  --t1: #cccccc;   /* primary body text */
+  --t2: #999999;   /* secondary */
+  --t3: #777777;   /* subdued (was #555) */
+  --t4: #606060;   /* dim labels (was #3a3a3a / #444) */
+  --t5: #4a4a4a;   /* ghost / section labels (was #252525) */
+
+  /* Knob canvas */
+  --kn-track: #1c1c1c;
+  --kn-hi:    #525252;
+  --kn-mid:   #2c2c2c;
+  --kn-lo:    #0e0e0e;
+  --kn-rim:   #3a3a3a;
+
+  /* Sequencer grid canvas */
+  --grid-off:        #141414;
+  --grid-off-act:    #1e2a2a;
+  --grid-lbl:        #686868;
+
+  /* VU meter off-segments */
+  --vu-r:  #200000;
+  --vu-y:  #1a1000;
+  --vu-g:  #001a08;
+
+  /* Interactive */
+  --input-bg:       #111111;
+  --input-bdr:      #222222;
+  --accent-cyan:    #00e5ff;
+  --btn-play-hover: #001a1f;
+  --btn-add-hover:  #0d0019;
+  --scrollbar-bg:   #090909;
+  --scrollbar-thumb:#252525;
+}
+
+:root.light-mode {
+  --bg:         #dedede;
+  --bg-rack:    #d2d2d2;
+  --s0:         #eeeeee;
+  --s1:         #c6c6c6;
+  --s2:         #e4e4e4;
+  --s3:         #d0d0d0;
+  --s4:         #dadada;
+
+  --b0: #c0c0c0;
+  --b1: #b6b6b6;
+  --b2: #aaaaaa;
+  --b3: #989898;
+  --b4: #686868;
+
+  --t1: #1a1a1a;
+  --t2: #3a3a3a;
+  --t3: #555555;
+  --t4: #686868;
+  --t5: #888888;
+
+  --kn-track: #aaaaaa;
+  --kn-hi:    #888888;
+  --kn-mid:   #666666;
+  --kn-lo:    #444444;
+  --kn-rim:   #888888;
+
+  --grid-off:        #c8c8c8;
+  --grid-off-act:    #b6ccd0;
+  --grid-lbl:        #909090;
+
+  --vu-r:  #f0d0d0;
+  --vu-y:  #f0ead0;
+  --vu-g:  #d0f0e0;
+
+  --input-bg:       #e6e6e6;
+  --input-bdr:      #b0b0b0;
+  --accent-cyan:    #0088aa;
+  --btn-play-hover: #d0f4ff;
+  --btn-add-hover:  #ece0ff;
+  --scrollbar-bg:   #d2d2d2;
+  --scrollbar-thumb:#b0b0b0;
+}
+
 /* ── Reset / base ────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: #080808;
-  color: #ccc;
+  background: var(--bg);
+  color: var(--t1);
   font-family: 'Courier New', Courier, monospace;
   font-size: 12px;
   min-height: 100vh;
@@ -13,44 +109,47 @@ body {
 
 /* ── App header ──────────────────────────────────────────────────────────────── */
 .app-header {
-  background: #0e0e0e;
-  border-bottom: 1px solid #1e1e1e;
+  background: var(--s1);
+  border-bottom: 1px solid var(--b2);
   padding: 10px 16px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .app-logo {
   font-size: 14px;
   font-weight: bold;
   letter-spacing: 3px;
-  color: #00e5ff;
+  color: var(--accent-cyan);
   text-shadow: 0 0 10px rgba(0,229,255,0.4);
   user-select: none;
+  flex-shrink: 0;
 }
 
 .transport {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .bpm-wrap {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #555;
+  color: var(--t3);
   font-size: 11px;
   letter-spacing: 1px;
 }
 
 .bpm-input {
   width: 52px;
-  background: #111;
-  color: #00e5ff;
-  border: 1px solid #222;
+  background: var(--input-bg);
+  color: var(--accent-cyan);
+  border: 1px solid var(--input-bdr);
   border-radius: 3px;
   padding: 3px 6px;
   font-family: inherit;
@@ -58,12 +157,12 @@ body {
   text-align: center;
   outline: none;
 }
-.bpm-input:focus { border-color: #00e5ff; }
+.bpm-input:focus { border-color: var(--accent-cyan); }
 
 .btn {
-  background: #161616;
-  color: #aaa;
-  border: 1px solid #252525;
+  background: var(--s3);
+  color: var(--t2);
+  border: 1px solid var(--b3);
   border-radius: 4px;
   padding: 5px 14px;
   font-family: inherit;
@@ -72,14 +171,14 @@ body {
   cursor: pointer;
   transition: background 0.1s, color 0.1s, border-color 0.1s;
 }
-.btn:hover { background: #222; color: #eee; border-color: #444; }
+.btn:hover { background: var(--s4); color: var(--t1); border-color: var(--b4); }
 
 .btn-play {
-  color: #00e5ff;
+  color: var(--accent-cyan);
   border-color: rgba(0,229,255,0.3);
-  text-shadow: 0 0 6px rgba(0,229,255,0.3);
+  text-shadow: 0 0 6px rgba(0,229,255,0.25);
 }
-.btn-play:hover  { background: #001a1f; border-color: #00e5ff; }
+.btn-play:hover  { background: var(--btn-play-hover); border-color: var(--accent-cyan); }
 .btn-play.playing {
   background: #1a0000;
   color: #ff4444;
@@ -93,15 +192,22 @@ body {
 }
 
 .btn-add { color: #7c4dff; border-color: rgba(124,77,255,0.3); }
-.btn-add:hover { background: #0d0019; border-color: #7c4dff; }
+.btn-add:hover { background: var(--btn-add-hover); border-color: #7c4dff; }
+
+.btn-theme {
+  color: var(--t3);
+  border-color: var(--b2);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.btn-theme:hover { color: var(--t1); }
 
 .master-wrap {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-left: auto;
-  color: #444;
-  font-size: 10px;
+  color: var(--t4);
+  font-size: 11px;
   letter-spacing: 1px;
 }
 
@@ -116,25 +222,24 @@ body {
   overflow-y: auto;
   min-height: 120px;
   max-height: 560px;
-  background: #090909;
-  border-bottom: 1px solid #161616;
+  background: var(--bg-rack);
+  border-bottom: 1px solid var(--s3);
   flex-shrink: 0;
 }
 #rack::-webkit-scrollbar       { width: 6px; height: 6px; }
-#rack::-webkit-scrollbar-track  { background: #090909; }
-#rack::-webkit-scrollbar-thumb  { background: #252525; border-radius: 3px; }
+#rack::-webkit-scrollbar-track  { background: var(--scrollbar-bg); }
+#rack::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 3px; }
 
 /* ── Module ───────────────────────────────────────────────────────────────────── */
 .module {
   width: 316px;
   flex-shrink: 0;
-  background: #111;
-  border: 1px solid #1e1e1e;
+  background: var(--s2);
+  border: 1px solid var(--b2);
   border-radius: 6px;
   overflow: hidden;
   position: relative;
 }
-/* Colored accent bar */
 .module::before {
   content: '';
   position: absolute;
@@ -145,8 +250,8 @@ body {
 }
 
 .mod-header {
-  background: #161616;
-  border-bottom: 1px solid #1e1e1e;
+  background: var(--s3);
+  border-bottom: 1px solid var(--b2);
   padding: 5px 7px 5px 12px;
   display: flex;
   align-items: center;
@@ -154,7 +259,7 @@ body {
 }
 
 .mod-name {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 2px;
   color: var(--accent, #00e5ff);
   flex-shrink: 0;
@@ -165,27 +270,27 @@ body {
 .wave-btns { display: flex; gap: 2px; }
 
 .wave-btn {
-  background: #111;
-  color: #3a3a3a;
-  border: 1px solid #1e1e1e;
+  background: var(--s2);
+  color: var(--t4);
+  border: 1px solid var(--b2);
   border-radius: 2px;
   padding: 2px 5px;
   font-family: inherit;
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: color 0.1s, background 0.1s;
 }
-.wave-btn:hover { color: #888; background: #1a1a1a; }
+.wave-btn:hover { color: var(--t2); background: var(--s4); }
 .wave-btn.active {
-  background: #1a1a1a;
+  background: var(--s4);
   color: var(--accent, #00e5ff);
   border-color: var(--accent, #00e5ff);
   text-shadow: 0 0 4px var(--accent, #00e5ff);
 }
 
 /* Mute button */
-.mod-mute { color: #3a3a3a; }
+.mod-mute { color: var(--t4); }
 .mod-mute.muted {
   background: rgba(255,68,68,0.15) !important;
   color: #ff4444 !important;
@@ -195,7 +300,7 @@ body {
 
 .mod-close {
   background: none;
-  color: #2a2a2a;
+  color: var(--t5);
   border: none;
   font-size: 11px;
   cursor: pointer;
@@ -226,16 +331,16 @@ body {
 }
 
 .knob-val {
-  font-size: 7px;
-  color: #444;
+  font-size: 9px;
+  color: var(--t4);
   text-align: center;
-  min-height: 9px;
+  min-height: 11px;
   letter-spacing: 0.3px;
 }
 
 .knob-lbl {
-  font-size: 7px;
-  color: #3a3a3a;
+  font-size: 9px;
+  color: var(--t4);
   text-align: center;
   letter-spacing: 1px;
 }
@@ -244,8 +349,8 @@ body {
 
 /* ── Section labels ───────────────────────────────────────────────────────────── */
 .section-lbl {
-  font-size: 7px;
-  color: #252525;
+  font-size: 9px;
+  color: var(--t5);
   letter-spacing: 2px;
   text-align: center;
   margin: 5px 0 3px;
@@ -253,19 +358,16 @@ body {
 
 .fx-toggle {
   cursor: pointer;
-  color: #333;
+  color: var(--t4);
   transition: color 0.15s;
 }
-.fx-toggle:hover { color: #555; }
+.fx-toggle:hover { color: var(--t3); }
 
 /* ── Sequencer canvas ─────────────────────────────────────────────────────────── */
-.seq-canvas { display: block; border-radius: 2px; background: #0c0c0c; }
+.seq-canvas { display: block; border-radius: 2px; background: var(--s0); }
 
 /* ── Effects panel ────────────────────────────────────────────────────────────── */
-.fx-panel {
-  display: none;
-  margin-top: 4px;
-}
+.fx-panel { display: none; margin-top: 4px; }
 .fx-panel.open { display: block; }
 
 .fx-adder {
@@ -276,21 +378,21 @@ body {
 }
 
 .fx-add-btn {
-  background: #141414;
-  color: #444;
-  border: 1px solid #1e1e1e;
+  background: var(--s0);
+  color: var(--t4);
+  border: 1px solid var(--b2);
   border-radius: 2px;
   padding: 2px 7px;
   font-family: inherit;
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.5px;
   cursor: pointer;
-  transition: color 0.1s, border-color 0.1s;
+  transition: color 0.1s, border-color 0.1s, background 0.1s;
 }
 .fx-add-btn:hover {
-  color: #00e5ff;
+  color: var(--accent-cyan);
   border-color: rgba(0,229,255,0.4);
-  background: #0a1215;
+  background: var(--btn-play-hover);
 }
 
 .fx-rows { display: flex; flex-direction: column; gap: 4px; }
@@ -299,32 +401,27 @@ body {
   display: flex;
   align-items: flex-end;
   gap: 4px;
-  background: #0e0e0e;
-  border: 1px solid #1a1a1a;
+  background: var(--s1);
+  border: 1px solid var(--b1);
   border-radius: 3px;
-  padding: 4px 6px 4px 6px;
+  padding: 4px 6px;
 }
 
 .fx-name {
-  font-size: 7px;
+  font-size: 9px;
   letter-spacing: 1px;
-  color: #555;
+  color: var(--t3);
   width: 38px;
   flex-shrink: 0;
   align-self: center;
 }
 
-.fx-knobs {
-  display: flex;
-  gap: 2px;
-  flex: 1;
-}
-
+.fx-knobs { display: flex; gap: 2px; flex: 1; }
 .fx-knobs .knob-wrap { flex: 1; }
 
 .fx-remove {
   background: none;
-  color: #2a2a2a;
+  color: var(--t5);
   border: none;
   font-size: 14px;
   cursor: pointer;
@@ -339,24 +436,26 @@ body {
 #drum-section {
   flex: 1;
   overflow-y: auto;
-  background: #090909;
+  overflow-x: auto;
+  background: var(--bg-rack);
   padding: 12px 16px;
 }
-#drum-section::-webkit-scrollbar       { width: 6px; }
-#drum-section::-webkit-scrollbar-track  { background: #090909; }
-#drum-section::-webkit-scrollbar-thumb  { background: #252525; border-radius: 3px; }
+#drum-section::-webkit-scrollbar       { width: 6px; height: 6px; }
+#drum-section::-webkit-scrollbar-track  { background: var(--scrollbar-bg); }
+#drum-section::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 3px; }
 
 .drum-machine {
-  background: #111;
-  border: 1px solid #1e1e1e;
+  background: var(--s2);
+  border: 1px solid var(--b2);
   border-radius: 6px;
   overflow: hidden;
-  max-width: 940px;
+  max-width: 1200px;
+  min-width: 600px;
 }
 
 .drum-header {
-  background: #161616;
-  border-bottom: 1px solid #1e1e1e;
+  background: var(--s3);
+  border-bottom: 1px solid var(--b2);
   padding: 7px 12px;
   display: flex;
   align-items: center;
@@ -365,7 +464,7 @@ body {
 }
 
 .drum-title-text {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 3px;
   color: #ff6b35;
   text-shadow: 0 0 8px rgba(255,107,53,0.4);
@@ -376,23 +475,23 @@ body {
 .kit-btns { display: flex; gap: 3px; }
 
 .kit-btn {
-  background: #111;
-  color: #3a3a3a;
-  border: 1px solid #1e1e1e;
+  background: var(--s2);
+  color: var(--t4);
+  border: 1px solid var(--b2);
   border-radius: 2px;
   padding: 2px 7px;
   font-family: inherit;
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.5px;
   cursor: pointer;
-  transition: color 0.1s, border-color 0.1s;
+  transition: color 0.1s, border-color 0.1s, background 0.1s;
 }
-.kit-btn:hover { color: #888; background: #1a1a1a; }
+.kit-btn:hover { color: var(--t2); background: var(--s4); }
 .kit-btn.active {
-  background: #1a1a1a;
+  background: var(--s4);
   color: #ff6b35;
   border-color: rgba(255,107,53,0.6);
-  text-shadow: 0 0 4px rgba(255,107,53,0.5);
+  text-shadow: 0 0 4px rgba(255,107,53,0.4);
 }
 
 .drum-master-meter { flex: 1; max-width: 120px; border-radius: 2px; }
@@ -402,15 +501,16 @@ body {
   display: flex;
   align-items: center;
   padding: 3px 10px;
-  border-bottom: 1px solid #141414;
+  border-bottom: 1px solid var(--b0);
 }
-.drum-row-spacer   { width: 102px; flex-shrink: 0; }
+.drum-row-spacer { width: 262px; flex-shrink: 0; }
 .drum-ruler-num {
   flex: 1;
   text-align: center;
-  font-size: 7px;
-  color: #2a2a2a;
-  height: 10px;
+  font-size: 9px;
+  color: var(--t5);
+  height: 12px;
+  line-height: 12px;
 }
 .drum-ruler-num.group-start { margin-left: 4px; }
 .drum-ruler-num:first-child  { margin-left: 0; }
@@ -420,22 +520,75 @@ body {
   display: flex;
   align-items: center;
   padding: 5px 10px;
-  border-bottom: 1px solid #131313;
+  border-bottom: 1px solid var(--b0);
   gap: 8px;
 }
 .drum-row:last-child { border-bottom: none; }
 
 .drum-ch-label {
   width: 46px;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1px;
   flex-shrink: 0;
   text-shadow: 0 0 5px currentColor;
 }
 
-.drum-vol-knob { width: 40px; flex-shrink: 0; }
+.drum-vol-knob { width: 28px; flex-shrink: 0; }
 .drum-vol-knob .knob-lbl,
 .drum-vol-knob .knob-val { display: none; }
+
+/* Drum type select */
+.drum-type-select {
+  width: 56px;
+  flex-shrink: 0;
+  background: var(--input-bg);
+  color: var(--t3);
+  border: 1px solid var(--input-bdr);
+  border-radius: 2px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  padding: 2px 3px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.drum-type-select:focus { border-color: var(--b4); }
+
+/* Drum tune / tone / nudge knobs */
+.drum-tune-knob,
+.drum-tone-knob,
+.drum-nudge-knob { width: 28px; flex-shrink: 0; }
+
+/* Octave selector */
+.oct-btns {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.oct-btn {
+  background: var(--s2);
+  color: var(--t4);
+  border: 1px solid var(--b2);
+  border-radius: 2px;
+  padding: 2px 0;
+  width: 26px;
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s;
+}
+.oct-btn:hover { color: var(--t2); background: var(--s4); }
+.oct-btn.active {
+  background: var(--s4);
+  color: var(--accent, #00e5ff);
+  border-color: var(--accent, #00e5ff);
+  text-shadow: 0 0 4px var(--accent, #00e5ff);
+}
 
 .drum-steps { display: flex; gap: 2px; flex: 1; }
 
@@ -443,8 +596,8 @@ body {
 .drum-step {
   flex: 1;
   height: 22px;
-  background: #131313;
-  border: 1px solid #1a1a1a;
+  background: var(--b0);
+  border: 1px solid var(--b1);
   border-radius: 2px;
   cursor: pointer;
   transition: background 0.05s, box-shadow 0.05s;
@@ -452,7 +605,7 @@ body {
 }
 .drum-step.group-start { margin-left: 4px; }
 .drum-step:first-child  { margin-left: 0; }
-.drum-step:hover { background: #1e1e1e; }
+.drum-step:hover { background: var(--s4); }
 .drum-step.active {
   background: var(--col, #ff6b35);
   border-color: var(--col, #ff6b35);
@@ -466,4 +619,40 @@ body {
   background: #ffffff;
   border-color: #ffffff;
   box-shadow: 0 0 10px #fff, 0 0 20px var(--col, #ff6b35);
+}
+
+/* ── Light mode adjustments ───────────────────────────────────────────────────── */
+:root.light-mode .app-logo { text-shadow: none; }
+:root.light-mode .btn-play { text-shadow: none; }
+:root.light-mode .drum-title-text { text-shadow: none; }
+:root.light-mode .module::before { box-shadow: none; }
+
+/* Accent-colored text needs darkening on light backgrounds */
+:root.light-mode .mod-name,
+:root.light-mode .wave-btn.active,
+:root.light-mode .oct-btn.active {
+  color: color-mix(in srgb, var(--accent, #00e5ff), #000000 55%);
+  text-shadow: none;
+}
+
+:root.light-mode .kit-btn.active {
+  color: color-mix(in srgb, #ff6b35, #000000 45%);
+  text-shadow: none;
+}
+
+:root.light-mode .drum-step.playing {
+  outline-color: rgba(0,0,0,0.25);
+}
+:root.light-mode .drum-step.active.playing {
+  background: var(--col, #ff6b35);
+  border-color: #ffffff;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3), 0 0 12px var(--col, #ff6b35);
+}
+
+:root.light-mode .drum-ch-label { text-shadow: none; }
+
+/* ── Responsive header ────────────────────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .btn-theme { margin-left: 0; }
+  .master-wrap { margin-left: 0; }
 }

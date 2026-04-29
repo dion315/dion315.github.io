@@ -15,6 +15,7 @@ class Voice {
     this.filter = ctx.createBiquadFilter();
     this.filter.type = "lowpass";
     this.filter.frequency.setValueAtTime(track.cutoff, time);
+    this.filter.Q.setValueAtTime(track.resonance || 1, time);
 
     this.gain = ctx.createGain();
     this.pan = ctx.createStereoPanner();

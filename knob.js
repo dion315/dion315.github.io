@@ -2,8 +2,14 @@ class Knob {
   // 270° sweep: starts at 7:30 (135° from 3-o'clock), ends at 4:30
   static S = 3 * Math.PI / 4;
   static W = 3 * Math.PI / 2;
+  static all = [];
 
-  constructor({ label, min, max, value, step = 0.01, onChange, color = '#00e5ff', size = 48 }) {
+  static redrawAll() {
+    Knob.all = Knob.all.filter(k => document.contains(k.canvas));
+    Knob.all.forEach(k => k.draw());
+  }
+
+  constructor({ label, min, max, value, step = 0.01, onChange, color = '#00e5ff', size = 48, fmt = null }) {
     this.min = min;
     this.max = max;
     this.value = Math.max(min, Math.min(max, value));
@@ -11,6 +17,7 @@ class Knob {
     this.onChange = onChange;
     this.color = color;
     this.size = size;
+    this._fmtFn = fmt;
 
     this.el = document.createElement('div');
     this.el.className = 'knob-wrap';
@@ -35,6 +42,7 @@ class Knob {
 
     this._listen();
     this.draw();
+    Knob.all.push(this);
   }
 
   _listen() {
@@ -85,12 +93,20 @@ class Knob {
     const S   = Knob.S, W = Knob.W;
     const norm = (this.value - this.min) / (this.max - this.min);
 
+    // Read theme-aware colors from CSS custom properties
+    const cs       = getComputedStyle(document.documentElement);
+    const trackCol = cs.getPropertyValue('--kn-track').trim() || '#1c1c1c';
+    const hiCol    = cs.getPropertyValue('--kn-hi').trim()    || '#525252';
+    const midCol   = cs.getPropertyValue('--kn-mid').trim()   || '#2c2c2c';
+    const loCol    = cs.getPropertyValue('--kn-lo').trim()    || '#0e0e0e';
+    const rimCol   = cs.getPropertyValue('--kn-rim').trim()   || '#3a3a3a';
+
     c.clearRect(0, 0, sz, sz);
 
     // Track ring
     c.beginPath();
     c.arc(cx, cy, ro, S, S + W);
-    c.strokeStyle = '#1c1c1c';
+    c.strokeStyle = trackCol;
     c.lineWidth = 3;
     c.lineCap = 'round';
     c.stroke();
@@ -110,14 +126,14 @@ class Knob {
 
     // Knob body with radial gradient (3D dome effect)
     const g = c.createRadialGradient(cx - rb * 0.3, cy - rb * 0.3, rb * 0.1, cx, cy, rb);
-    g.addColorStop(0,   '#525252');
-    g.addColorStop(0.4, '#2c2c2c');
-    g.addColorStop(1,   '#0e0e0e');
+    g.addColorStop(0,   hiCol);
+    g.addColorStop(0.4, midCol);
+    g.addColorStop(1,   loCol);
     c.beginPath();
     c.arc(cx, cy, rb, 0, Math.PI * 2);
     c.fillStyle = g;
     c.fill();
-    c.strokeStyle = '#3a3a3a';
+    c.strokeStyle = rimCol;
     c.lineWidth = 1;
     c.stroke();
 
@@ -136,6 +152,7 @@ class Knob {
   }
 
   _fmt() {
+    if (this._fmtFn) return this._fmtFn(this.value);
     const v = this.value, range = this.max - this.min;
     if (range <= 2)    return v.toFixed(2);
     if (range >= 500)  return Math.round(v);
