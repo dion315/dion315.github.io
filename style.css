@@ -503,7 +503,7 @@ body {
   padding: 3px 10px;
   border-bottom: 1px solid var(--b0);
 }
-.drum-row-spacer { width: 262px; flex-shrink: 0; }
+.drum-row-spacer { width: 326px; flex-shrink: 0; }
 .drum-ruler-num {
   flex: 1;
   text-align: center;
@@ -556,10 +556,12 @@ body {
 }
 .drum-type-select:focus { border-color: var(--b4); }
 
-/* Drum tune / tone / nudge knobs */
+/* Drum tune / tone / nudge / dist / sat knobs */
 .drum-tune-knob,
 .drum-tone-knob,
-.drum-nudge-knob { width: 28px; flex-shrink: 0; }
+.drum-nudge-knob,
+.drum-dist-knob,
+.drum-sat-knob { width: 28px; flex-shrink: 0; }
 
 /* Octave selector */
 .oct-btns {
@@ -650,6 +652,36 @@ body {
 }
 
 :root.light-mode .drum-ch-label { text-shadow: none; }
+
+/* ── Touch / Mobile ──────────────────────────────────────────────────────────── */
+
+/* Remove 300ms tap delay on interactive elements */
+button, .drum-step { touch-action: manipulation; }
+
+/* Momentum scrolling on iOS */
+#rack, #drum-section { -webkit-overflow-scrolling: touch; }
+
+/* Prevent text selection / callout on long-press */
+button, canvas { -webkit-user-select: none; user-select: none; }
+
+/* Kit buttons may wrap on narrow screens */
+.kit-btns { flex-wrap: wrap; }
+
+/* Touch-friendly targets on coarse-pointer (touch) devices */
+@media (hover: none) and (pointer: coarse) {
+  .drum-step { height: 30px; }
+
+  .wave-btn,
+  .kit-btn,
+  .oct-btn,
+  .fx-add-btn { padding: 5px 8px; min-height: 30px; }
+
+  .drum-type-select { height: 30px; }
+
+  /* BPM and play button bigger for fat fingers */
+  .bpm-input  { font-size: 15px; padding: 5px 8px; width: 60px; }
+  .btn        { padding: 8px 16px; }
+}
 
 /* ── Responsive header ────────────────────────────────────────────────────────── */
 @media (max-width: 680px) {

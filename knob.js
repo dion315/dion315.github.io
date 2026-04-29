@@ -13,6 +13,7 @@ class Knob {
     this.min = min;
     this.max = max;
     this.value = Math.max(min, Math.min(max, value));
+    this._default = this.value;
     this.step = step;
     this.onChange = onChange;
     this.color = color;
@@ -27,6 +28,7 @@ class Knob {
     this.canvas.height = size;
     this.canvas.style.cursor = 'ns-resize';
     this.canvas.style.display = 'block';
+    this.canvas.style.touchAction = 'none';
     this.ctx = this.canvas.getContext('2d');
 
     this.valEl = document.createElement('div');
@@ -72,6 +74,23 @@ class Knob {
       startVal = this.value;
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
+    });
+
+    this.canvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      startY = e.touches[0].clientY;
+      startVal = this.value;
+    }, { passive: false });
+
+    this.canvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (e.touches.length > 0) onMove(e);
+    }, { passive: false });
+
+    this.canvas.addEventListener('dblclick', () => {
+      this.value = this._default;
+      this.draw();
+      this.onChange(this.value);
     });
 
     this.canvas.addEventListener('wheel', e => {

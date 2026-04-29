@@ -354,13 +354,21 @@ class DrumMachine {
     });
     this.volumes   = DRUM_DEFS.map(() => 0.8);
     this.chanTypes  = DRUM_DEFS.map(d => d.id);
-    this.chanTunes  = DRUM_DEFS.map(() => 0);
-    this.chanTones  = DRUM_DEFS.map(() => 0.5);
-    this.chanNudges = DRUM_DEFS.map(() => 0);
-    this.voices    = DRUM_DEFS.map(() => new DrumVoice(audioCtx));
-    this.chanGains = DRUM_DEFS.map(() => {
+    this.chanTunes   = DRUM_DEFS.map(() => 0);
+    this.chanTones   = DRUM_DEFS.map(() => 0.5);
+    this.chanNudges  = DRUM_DEFS.map(() => 0);
+    this.chanDists   = DRUM_DEFS.map(() => 0);
+    this.chanSats    = DRUM_DEFS.map(() => 0);
+    this.voices      = DRUM_DEFS.map(() => new DrumVoice(audioCtx));
+    this.chanShapers = DRUM_DEFS.map(() => {
+      const s = audioCtx.createWaveShaper();
+      s.oversample = '2x';
+      s.connect(this.output);
+      return s;
+    });
+    this.chanGains = DRUM_DEFS.map((_, i) => {
       const g = audioCtx.createGain();
-      g.connect(this.output);
+      g.connect(this.chanShapers[i]);
       return g;
     });
 
@@ -415,6 +423,30 @@ class DrumMachine {
 
   _setPlayhead(s)   { this._stepBtns.forEach(row => row[s]?.classList.add('playing')); }
   _clearPlayhead(s) { this._stepBtns.forEach(row => row[s]?.classList.remove('playing')); }
+
+  // ── Distortion / saturation ──────────────────────────────────────────────────
+
+  static _makeCurve(sat, dist) {
+    if (sat < 0.001 && dist < 0.001) return null;
+    const N = 256;
+    const curve = new Float32Array(N);
+    for (let i = 0; i < N; i++) {
+      const x = 2 * i / (N - 1) - 1;
+      const satDrive = 1 + sat * 9;
+      const satY = Math.tanh(x * satDrive) / Math.tanh(satDrive);
+      let y = x + (satY - x) * sat;
+      if (dist > 0.001) {
+        const clip = Math.max(0.05, 1 - dist * 0.75);
+        y = Math.max(-clip, Math.min(clip, y)) / clip;
+      }
+      curve[i] = y;
+    }
+    return curve;
+  }
+
+  _updateCurve(i) {
+    this.chanShapers[i].curve = DrumMachine._makeCurve(this.chanSats[i], this.chanDists[i]);
+  }
 
   // ── Level meter ──────────────────────────────────────────────────────────────
 
@@ -562,6 +594,26 @@ class DrumMachine {
       });
       nudgeK.el.classList.add('drum-nudge-knob');
       row.appendChild(nudgeK.el);
+
+      // Distortion knob
+      const distK = new Knob({
+        label: 'DIST', min: 0, max: 1, step: 0.01, value: this.chanDists[di],
+        color: '#ff4444', size: 28,
+        fmt: v => Math.round(v * 100) + '%',
+        onChange: v => { this.chanDists[di] = v; this._updateCurve(di); }
+      });
+      distK.el.classList.add('drum-dist-knob');
+      row.appendChild(distK.el);
+
+      // Saturation knob
+      const satK = new Knob({
+        label: 'SAT', min: 0, max: 1, step: 0.01, value: this.chanSats[di],
+        color: '#ff8800', size: 28,
+        fmt: v => Math.round(v * 100) + '%',
+        onChange: v => { this.chanSats[di] = v; this._updateCurve(di); }
+      });
+      satK.el.classList.add('drum-sat-knob');
+      row.appendChild(satK.el);
 
       // 32 step buttons
       const stepsDiv = document.createElement('div');

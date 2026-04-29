@@ -17,13 +17,30 @@ let   drawFns = [];
 let   drumMachine;
 
 // ─── Track factory ────────────────────────────────────────────────────────────
-// Signal chain: track.output → [effects chain] → muteGain → analyser → master
+// Signal chain: satShaper → effectsIn → [effects chain] → muteGain → analyser → master
+
+function makeSatCurve(sat) {
+  if (sat < 0.001) return null;
+  const N = 256;
+  const curve = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const x = 2 * i / (N - 1) - 1;
+    const drive = 1 + sat * 9;
+    curve[i] = Math.tanh(x * drive) / Math.tanh(drive);
+  }
+  return curve;
+}
+
 function createTrack(idx) {
+  const satShaper = ctx.createWaveShaper();
+  satShaper.oversample = '2x';
+
   const effectsIn = ctx.createGain();
   const muteGain  = ctx.createGain();
   const analyser  = ctx.createAnalyser();
   analyser.fftSize = 256;
 
+  satShaper.connect(effectsIn);
   muteGain.connect(analyser);
   analyser.connect(master);
 
@@ -31,25 +48,27 @@ function createTrack(idx) {
   const chain = new EffectsChain(ctx, effectsIn, muteGain);
 
   return {
-    grid:      createGrid(),
-    volume:    0.7,
-    pan:       0,
-    cutoff:    4000,
-    resonance: 1,
-    attack:    0.01,
-    decay:     0.2,
-    sustain:   0.6,
-    release:   0.3,
-    pitch:     0,
-    octave:    4,
-    nudge:     0,
-    waveType:  'sawtooth',
-    color:    TRACK_COLORS[idx % TRACK_COLORS.length],
-    output:   effectsIn,  // voice.js connects here
+    grid:       createGrid(),
+    volume:     0.7,
+    pan:        0,
+    cutoff:     4000,
+    resonance:  1,
+    saturation: 0,
+    attack:     0.01,
+    decay:      0.2,
+    sustain:    0.6,
+    release:    0.3,
+    pitch:      0,
+    octave:     4,
+    nudge:      0,
+    waveType:   'sawtooth',
+    color:      TRACK_COLORS[idx % TRACK_COLORS.length],
+    output:     satShaper,  // voice.js connects here
+    satShaper,
     muteGain,
     analyser,
     chain,
-    muted:    false,
+    muted:      false,
     _meterData: new Uint8Array(128),
     _peak: 0, _peakHold: 0,
   };
@@ -69,6 +88,7 @@ function addTrack() {
 
 function removeTrack(i) {
   const t = tracks[i];
+  t.satShaper.disconnect();
   t.chain.dispose();
   t.muteGain.disconnect();
   t.analyser.disconnect();
@@ -149,8 +169,11 @@ function buildModule(t, i) {
     onChange: v => { t.cutoff = v; } });
   const resK = new Knob({ label:'RES',    min:0.1, max:20,   step:0.1,  value:t.resonance, color:'#ff6600', size:48,
     onChange: v => { t.resonance = v; } });
+  const satK = new Knob({ label:'SAT',    min:0,   max:1,    step:0.01, value:t.saturation,color:'#ff8800', size:48,
+    fmt: v => Math.round(v * 100) + '%',
+    onChange: v => { t.saturation = v; t.satShaper.curve = makeSatCurve(v); } });
 
-  [volK, panK, cutK, resK].forEach(k => row1.appendChild(k.el));
+  [volK, panK, cutK, resK, satK].forEach(k => row1.appendChild(k.el));
 
   const meterCanvas = document.createElement('canvas');
   meterCanvas.width = 10; meterCanvas.height = 72;
@@ -352,6 +375,19 @@ function renderGrid(track) {
       draw();
     }
   });
+
+  c.addEventListener('touchstart', e => { e.preventDefault(); }, { passive: false });
+  c.addEventListener('touchend', e => {
+    if (!e.changedTouches.length) return;
+    const touch = e.changedTouches[0];
+    const rect  = c.getBoundingClientRect();
+    const cx = Math.floor((touch.clientX - rect.left - LABEL_W) / CELL_W);
+    const r  = Math.floor((touch.clientY - rect.top)  / CELL_H);
+    if (r >= 0 && r < 12 && cx >= 0 && cx < 16) {
+      track.grid[r][cx].on = !track.grid[r][cx].on;
+      draw();
+    }
+  }, { passive: false });
 
   draw();
   return { canvas: c, draw };
