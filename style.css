@@ -1,0 +1,469 @@
+/* ── Reset / base ────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #080808;
+  color: #ccc;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── App header ──────────────────────────────────────────────────────────────── */
+.app-header {
+  background: #0e0e0e;
+  border-bottom: 1px solid #1e1e1e;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.app-logo {
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: #00e5ff;
+  text-shadow: 0 0 10px rgba(0,229,255,0.4);
+  user-select: none;
+}
+
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bpm-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #555;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.bpm-input {
+  width: 52px;
+  background: #111;
+  color: #00e5ff;
+  border: 1px solid #222;
+  border-radius: 3px;
+  padding: 3px 6px;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+}
+.bpm-input:focus { border-color: #00e5ff; }
+
+.btn {
+  background: #161616;
+  color: #aaa;
+  border: 1px solid #252525;
+  border-radius: 4px;
+  padding: 5px 14px;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+.btn:hover { background: #222; color: #eee; border-color: #444; }
+
+.btn-play {
+  color: #00e5ff;
+  border-color: rgba(0,229,255,0.3);
+  text-shadow: 0 0 6px rgba(0,229,255,0.3);
+}
+.btn-play:hover  { background: #001a1f; border-color: #00e5ff; }
+.btn-play.playing {
+  background: #1a0000;
+  color: #ff4444;
+  border-color: rgba(255,68,68,0.5);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,68,68,0.15); }
+  50%      { box-shadow: 0 0 0 5px rgba(255,68,68,0); }
+}
+
+.btn-add { color: #7c4dff; border-color: rgba(124,77,255,0.3); }
+.btn-add:hover { background: #0d0019; border-color: #7c4dff; }
+
+.master-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: #444;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+/* ── Rack ─────────────────────────────────────────────────────────────────────── */
+#rack {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px;
+  overflow-x: auto;
+  overflow-y: auto;
+  min-height: 120px;
+  max-height: 560px;
+  background: #090909;
+  border-bottom: 1px solid #161616;
+  flex-shrink: 0;
+}
+#rack::-webkit-scrollbar       { width: 6px; height: 6px; }
+#rack::-webkit-scrollbar-track  { background: #090909; }
+#rack::-webkit-scrollbar-thumb  { background: #252525; border-radius: 3px; }
+
+/* ── Module ───────────────────────────────────────────────────────────────────── */
+.module {
+  width: 316px;
+  flex-shrink: 0;
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+/* Colored accent bar */
+.module::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--accent, #00e5ff);
+  box-shadow: 0 0 8px var(--accent, #00e5ff);
+  z-index: 1;
+}
+
+.mod-header {
+  background: #161616;
+  border-bottom: 1px solid #1e1e1e;
+  padding: 5px 7px 5px 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mod-name {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--accent, #00e5ff);
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+/* Waveform buttons */
+.wave-btns { display: flex; gap: 2px; }
+
+.wave-btn {
+  background: #111;
+  color: #3a3a3a;
+  border: 1px solid #1e1e1e;
+  border-radius: 2px;
+  padding: 2px 5px;
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s;
+}
+.wave-btn:hover { color: #888; background: #1a1a1a; }
+.wave-btn.active {
+  background: #1a1a1a;
+  color: var(--accent, #00e5ff);
+  border-color: var(--accent, #00e5ff);
+  text-shadow: 0 0 4px var(--accent, #00e5ff);
+}
+
+/* Mute button */
+.mod-mute { color: #3a3a3a; }
+.mod-mute.muted {
+  background: rgba(255,68,68,0.15) !important;
+  color: #ff4444 !important;
+  border-color: rgba(255,68,68,0.5) !important;
+  text-shadow: 0 0 4px #ff4444;
+}
+
+.mod-close {
+  background: none;
+  color: #2a2a2a;
+  border: none;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+  transition: color 0.1s;
+  margin-left: auto;
+}
+.mod-close:hover { color: #ff4444; }
+
+.mod-body { padding: 8px 10px 10px 14px; }
+
+/* ── Knob rows ────────────────────────────────────────────────────────────────── */
+.knob-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.knob-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.knob-val {
+  font-size: 7px;
+  color: #444;
+  text-align: center;
+  min-height: 9px;
+  letter-spacing: 0.3px;
+}
+
+.knob-lbl {
+  font-size: 7px;
+  color: #3a3a3a;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.vu-meter { align-self: flex-end; border-radius: 2px; margin-left: 2px; }
+
+/* ── Section labels ───────────────────────────────────────────────────────────── */
+.section-lbl {
+  font-size: 7px;
+  color: #252525;
+  letter-spacing: 2px;
+  text-align: center;
+  margin: 5px 0 3px;
+}
+
+.fx-toggle {
+  cursor: pointer;
+  color: #333;
+  transition: color 0.15s;
+}
+.fx-toggle:hover { color: #555; }
+
+/* ── Sequencer canvas ─────────────────────────────────────────────────────────── */
+.seq-canvas { display: block; border-radius: 2px; background: #0c0c0c; }
+
+/* ── Effects panel ────────────────────────────────────────────────────────────── */
+.fx-panel {
+  display: none;
+  margin-top: 4px;
+}
+.fx-panel.open { display: block; }
+
+.fx-adder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 6px;
+}
+
+.fx-add-btn {
+  background: #141414;
+  color: #444;
+  border: 1px solid #1e1e1e;
+  border-radius: 2px;
+  padding: 2px 7px;
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+.fx-add-btn:hover {
+  color: #00e5ff;
+  border-color: rgba(0,229,255,0.4);
+  background: #0a1215;
+}
+
+.fx-rows { display: flex; flex-direction: column; gap: 4px; }
+
+.fx-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  background: #0e0e0e;
+  border: 1px solid #1a1a1a;
+  border-radius: 3px;
+  padding: 4px 6px 4px 6px;
+}
+
+.fx-name {
+  font-size: 7px;
+  letter-spacing: 1px;
+  color: #555;
+  width: 38px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.fx-knobs {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+
+.fx-knobs .knob-wrap { flex: 1; }
+
+.fx-remove {
+  background: none;
+  color: #2a2a2a;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  align-self: center;
+  transition: color 0.1s;
+}
+.fx-remove:hover { color: #ff4444; }
+
+/* ── Drum machine ─────────────────────────────────────────────────────────────── */
+#drum-section {
+  flex: 1;
+  overflow-y: auto;
+  background: #090909;
+  padding: 12px 16px;
+}
+#drum-section::-webkit-scrollbar       { width: 6px; }
+#drum-section::-webkit-scrollbar-track  { background: #090909; }
+#drum-section::-webkit-scrollbar-thumb  { background: #252525; border-radius: 3px; }
+
+.drum-machine {
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 6px;
+  overflow: hidden;
+  max-width: 940px;
+}
+
+.drum-header {
+  background: #161616;
+  border-bottom: 1px solid #1e1e1e;
+  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.drum-title-text {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #ff6b35;
+  text-shadow: 0 0 8px rgba(255,107,53,0.4);
+  flex-shrink: 0;
+}
+
+/* Kit selector */
+.kit-btns { display: flex; gap: 3px; }
+
+.kit-btn {
+  background: #111;
+  color: #3a3a3a;
+  border: 1px solid #1e1e1e;
+  border-radius: 2px;
+  padding: 2px 7px;
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+.kit-btn:hover { color: #888; background: #1a1a1a; }
+.kit-btn.active {
+  background: #1a1a1a;
+  color: #ff6b35;
+  border-color: rgba(255,107,53,0.6);
+  text-shadow: 0 0 4px rgba(255,107,53,0.5);
+}
+
+.drum-master-meter { flex: 1; max-width: 120px; border-radius: 2px; }
+
+/* Ruler */
+.drum-ruler {
+  display: flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-bottom: 1px solid #141414;
+}
+.drum-row-spacer   { width: 102px; flex-shrink: 0; }
+.drum-ruler-num {
+  flex: 1;
+  text-align: center;
+  font-size: 7px;
+  color: #2a2a2a;
+  height: 10px;
+}
+.drum-ruler-num.group-start { margin-left: 4px; }
+.drum-ruler-num:first-child  { margin-left: 0; }
+
+/* Channel rows */
+.drum-row {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-bottom: 1px solid #131313;
+  gap: 8px;
+}
+.drum-row:last-child { border-bottom: none; }
+
+.drum-ch-label {
+  width: 46px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+  text-shadow: 0 0 5px currentColor;
+}
+
+.drum-vol-knob { width: 40px; flex-shrink: 0; }
+.drum-vol-knob .knob-lbl,
+.drum-vol-knob .knob-val { display: none; }
+
+.drum-steps { display: flex; gap: 2px; flex: 1; }
+
+/* Step button */
+.drum-step {
+  flex: 1;
+  height: 22px;
+  background: #131313;
+  border: 1px solid #1a1a1a;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.05s, box-shadow 0.05s;
+  padding: 0;
+}
+.drum-step.group-start { margin-left: 4px; }
+.drum-step:first-child  { margin-left: 0; }
+.drum-step:hover { background: #1e1e1e; }
+.drum-step.active {
+  background: var(--col, #ff6b35);
+  border-color: var(--col, #ff6b35);
+  box-shadow: 0 0 5px var(--col, #ff6b35);
+}
+.drum-step.playing {
+  outline: 1px solid rgba(255,255,255,0.2);
+  outline-offset: -1px;
+}
+.drum-step.active.playing {
+  background: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 0 10px #fff, 0 0 20px var(--col, #ff6b35);
+}

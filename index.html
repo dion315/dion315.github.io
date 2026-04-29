@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Synth</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">OPEN SYNTH</div>
+
+  <div class="transport">
+    <div class="bpm-wrap">
+      BPM
+      <input id="bpm" class="bpm-input" value="120" type="number" min="20" max="300">
+    </div>
+    <button id="play-btn" class="btn btn-play" onclick="handlePlay()">&#9654; PLAY</button>
+    <button class="btn btn-add" onclick="addTrack()">+ TRACK</button>
+  </div>
+
+  <div class="master-wrap">
+    MASTER
+    <div id="master-vol-knob"></div>
+  </div>
+</header>
+
+<div id="rack"></div>
+
+<div id="drum-section"></div>
+
+<script src="voice.js"></script>
+<script src="voiceManager.js"></script>
+<script src="audioEngine.js"></script>
+<script src="scheduler.js"></script>
+<script src="knob.js"></script>
+<script src="effects.js"></script>
+<script src="drums.js"></script>
+<script src="ui.js"></script>
+
+</body>
+</html>
